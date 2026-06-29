@@ -605,7 +605,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         border: Border.all(color: AppTheme.cyberPurple.withOpacity(0.4), width: 1.5),
       ),
       child: Column(
-        cross: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
