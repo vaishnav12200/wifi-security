@@ -13,7 +13,9 @@ class AboutScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           // App Header Logo
           Center(
             child: Column(
@@ -116,6 +118,7 @@ class AboutScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
         ],
+        ),
       ),
     );
   }

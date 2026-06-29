@@ -168,7 +168,7 @@ class DbHelper {
   }
 
   Future close() async {
-    final db = instance._database;
+    final db = _database;
     if (db != null) {
       await db.close();
     }
