@@ -29,7 +29,7 @@ class AppTheme {
         onSurface: textPrimary,
         error: cyberRed,
       ),
-      cardTheme: const CardThemeData(
+      cardTheme: CardThemeData(
         color: darkCard,
         elevation: 4,
         shape: RoundedRectangleBorder(

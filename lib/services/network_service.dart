@@ -123,7 +123,6 @@ class NetworkService {
 
   /// Generates a realistic mock scan of nearby WiFi networks
   List<WifiNetwork> generateMockNearbyNetworks() {
-    final random = Random();
     return [
       // 1. Safe secure home network
       WifiNetwork(
