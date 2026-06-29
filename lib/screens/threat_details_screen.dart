@@ -9,10 +9,10 @@ class ThreatDetailsScreen extends StatelessWidget {
   final WifiNetwork activeNetwork;
 
   const ThreatDetailsScreen({
-    Key? key,
+    super.key,
     required this.alert,
     required this.activeNetwork,
-  }) : super(key: key);
+  });
 
   Color _getSeverityColor(String severity) {
     switch (severity.toLowerCase()) {

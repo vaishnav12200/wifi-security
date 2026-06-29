@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:io';
-import 'dart:math';
 import 'package:cybershield_wifi/models/wifi_network.dart';
 
 class NetworkService {

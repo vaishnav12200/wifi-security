@@ -18,10 +18,10 @@ class DashboardScreen extends StatefulWidget {
   final VoidCallback onNavigateToHistory;
 
   const DashboardScreen({
-    Key? key,
+    super.key,
     required this.onNavigateToScanner,
     required this.onNavigateToHistory,
-  }) : super(key: key);
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -51,7 +51,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   double _internetSpeed = 48.2;
   
   // Real-time chart data points
-  List<FlSpot> _latencyPoints = [];
+  final List<FlSpot> _latencyPoints = [];
   int _chartTimeCounter = 0;
 
   @override
@@ -452,7 +452,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Switch(
                       value: _continuousMonitoring,
                       onChanged: _toggleContinuousMonitoring,
-                      activeColor: AppTheme.cyberCyan,
+                      activeThumbColor: AppTheme.cyberCyan,
                     ),
                   ),
                 ],

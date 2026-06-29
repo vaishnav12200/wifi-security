@@ -13,7 +13,7 @@ import 'package:cybershield_wifi/theme/app_theme.dart';
 import 'package:cybershield_wifi/screens/threat_details_screen.dart';
 
 class ScannerScreen extends StatefulWidget {
-  const ScannerScreen({Key? key}) : super(key: key);
+  const ScannerScreen({super.key});
 
   @override
   State<ScannerScreen> createState() => _ScannerScreenState();

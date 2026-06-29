@@ -8,7 +8,7 @@ import 'package:cybershield_wifi/services/pdf_service.dart';
 import 'package:cybershield_wifi/theme/app_theme.dart';
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({Key? key}) : super(key: key);
+  const HistoryScreen({super.key});
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();

@@ -4,7 +4,7 @@ import 'package:cybershield_wifi/database/db_helper.dart';
 import 'package:cybershield_wifi/theme/app_theme.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -37,7 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onChanged: (val) {
                     setState(() => _autoScan = val);
                   },
-                  activeColor: AppTheme.cyberCyan,
+                  activeThumbColor: AppTheme.cyberCyan,
                 ),
                 const Divider(height: 1),
                 ListTile(
@@ -109,7 +109,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onChanged: (val) {
                     setState(() => _soundAlerts = val);
                   },
-                  activeColor: AppTheme.cyberCyan,
+                  activeThumbColor: AppTheme.cyberCyan,
                 ),
                 const Divider(height: 1),
                 ListTile(

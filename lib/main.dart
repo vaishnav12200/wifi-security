@@ -12,7 +12,7 @@ void main() {
 }
 
 class CyberShieldApp extends StatelessWidget {
-  const CyberShieldApp({Key? key}) : super(key: key);
+  const CyberShieldApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class CyberShieldApp extends StatelessWidget {
 }
 
 class MainNavigationShell extends StatefulWidget {
-  const MainNavigationShell({Key? key}) : super(key: key);
+  const MainNavigationShell({super.key});
 
   @override
   State<MainNavigationShell> createState() => _MainNavigationShellState();

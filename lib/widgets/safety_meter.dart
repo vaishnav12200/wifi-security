@@ -8,11 +8,11 @@ class SafetyMeter extends StatefulWidget {
   final VoidCallback? onTap;
 
   const SafetyMeter({
-    Key? key,
+    super.key,
     required this.score,
     required this.status,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<SafetyMeter> createState() => _SafetyMeterState();
