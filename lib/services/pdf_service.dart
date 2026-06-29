@@ -121,7 +121,7 @@ class PdfService {
                       ],
                     ),
                     pw.Column(
-                      cross: pw.CrossAxisAlignment.end,
+                      crossAxisAlignment: pw.CrossAxisAlignment.end,
                       children: [
                         pw.Text(
                           '$safetyScore%',
@@ -200,14 +200,14 @@ class PdfService {
                         
                         return pw.Container(
                           margin: const pw.EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(10),
+                          padding: const pw.EdgeInsets.all(10),
                           decoration: const pw.BoxDecoration(
                             color: PdfColors.grey100,
                             borderRadius: pw.BorderRadius.all(pw.Radius.circular(6)),
                             border: pw.Border(left: pw.BorderSide(color: PdfColors.grey400, width: 4)),
                           ),
                           child: pw.Column(
-                            cross: pw.CrossAxisAlignment.start,
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
                             children: [
                               pw.Row(
                                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
