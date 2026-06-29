@@ -29,12 +29,12 @@ class AppTheme {
         onSurface: textPrimary,
         error: cyberRed,
       ),
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         color: darkCard,
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF334155), width: 1),
+          side: BorderSide(color: Color(0xFF334155), width: 1),
         ),
       ),
       appBarTheme: AppBarTheme(
