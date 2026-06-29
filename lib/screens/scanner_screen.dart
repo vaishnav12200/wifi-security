@@ -7,6 +7,8 @@ import 'package:cybershield_wifi/models/threat_alert.dart';
 import 'package:cybershield_wifi/services/network_service.dart';
 import 'package:cybershield_wifi/services/threat_engine.dart';
 import 'package:cybershield_wifi/database/db_helper.dart';
+import 'package:uuid/uuid.dart';
+import 'package:cybershield_wifi/models/scan_history.dart';
 import 'package:cybershield_wifi/theme/app_theme.dart';
 import 'package:cybershield_wifi/screens/threat_details_screen.dart';
 
@@ -142,7 +144,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
         ],
       ),
       body: Column(
-        cross: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Radar Sweep Area
           if (_isScanning) _buildRadarArea() else _buildSimulationHeader(),
@@ -213,7 +215,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: AppTheme.darkSurface,
       child: Column(
-        cross: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
