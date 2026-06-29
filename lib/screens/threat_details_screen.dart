@@ -53,7 +53,7 @@ class ThreatDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('THREAT PROFILE'),
       ),
-      body: SingleChildScrollView(
+      body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
           // Alert Header Card
@@ -130,7 +130,7 @@ class ThreatDetailsScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                cross: const CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     'Technical Details',
