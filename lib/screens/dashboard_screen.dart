@@ -18,10 +18,10 @@ class DashboardScreen extends StatefulWidget {
   final VoidCallback onNavigateToHistory;
 
   const DashboardScreen({
-    super.key,
+    Key? key,
     required this.onNavigateToScanner,
     required this.onNavigateToHistory,
-  });
+  }) : super(key: key);
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -51,7 +51,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   double _internetSpeed = 48.2;
   
   // Real-time chart data points
-  final List<FlSpot> _latencyPoints = [];
+  List<FlSpot> _latencyPoints = [];
   int _chartTimeCounter = 0;
 
   @override
@@ -335,7 +335,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(width: 14),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                cross: CrossAxisAlignment.start,
                 children: [
                   Text(
                     _activeNetwork.ssid,
@@ -407,7 +407,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              cross: CrossAxisAlignment.start,
               children: [
                 Text(title, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
                 Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -452,7 +452,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Switch(
                       value: _continuousMonitoring,
                       onChanged: _toggleContinuousMonitoring,
-                      activeThumbColor: AppTheme.cyberCyan,
+                      activeColor: AppTheme.cyberCyan,
                     ),
                   ),
                 ],
