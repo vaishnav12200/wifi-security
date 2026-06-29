@@ -44,14 +44,14 @@ class PdfService {
         margin: const pw.EdgeInsets.all(32),
         build: (pw.Context context) {
           return pw.Column(
-            cross: pw.CrossAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               // Header
               pw.Row(
-                main: pw.MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Column(
-                    cross: pw.CrossAxisAlignment.start,
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
                         'CyberShield WiFi',
@@ -89,10 +89,10 @@ class PdfService {
                 ),
                 padding: const pw.EdgeInsets.all(16),
                 child: pw.Row(
-                  main: pw.MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Column(
-                      cross: pw.CrossAxisAlignment.start,
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text(
                           'SSID: ${network.ssid}',
@@ -200,7 +200,7 @@ class PdfService {
                         
                         return pw.Container(
                           margin: const pw.EdgeInsets.only(bottom: 8),
-                          padding: const pw.EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(10),
                           decoration: const pw.BoxDecoration(
                             color: PdfColors.grey100,
                             borderRadius: pw.BorderRadius.all(pw.Radius.circular(6)),
@@ -210,7 +210,7 @@ class PdfService {
                             cross: pw.CrossAxisAlignment.start,
                             children: [
                               pw.Row(
-                                main: pw.MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                                 children: [
                                   pw.Text(
                                     alert.title,
@@ -263,7 +263,7 @@ class PdfService {
               ),
               pw.Bullet(
                 text: 'Disclaimer: This report is advisory. Defensive metrics represent heuristics and may not guarantee detection of all advanced custom hardware attacks.',
-                style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey500, fontStyle: pw.FontStyle.italic),
+                style: pw.TextStyle(fontSize: 7, color: PdfColors.grey500, fontStyle: pw.FontStyle.italic),
               ),
             ],
           );
