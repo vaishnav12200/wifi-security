@@ -178,7 +178,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Column(
-                cross: const CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
@@ -187,7 +187,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   Text(
                     alert.description,
-                    style: const TextStyle(fontSize: 12, color: Colors.whiteEE),
+                    style: const TextStyle(fontSize: 12, color: Colors.white70),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -266,7 +266,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        cross: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Header Status Card
           _buildConnectedCard(),

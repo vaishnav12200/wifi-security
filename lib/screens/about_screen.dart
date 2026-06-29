@@ -57,7 +57,7 @@ class AboutScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                cross: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     'CyberShield WiFi is an intelligent public wireless security analyzer designed to evaluate risk factors before users engage in network communication.',
@@ -86,7 +86,7 @@ class AboutScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                cross: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildTechSpec('Frontend', 'Flutter 3.x (Material 3 Dark Theme)'),
                   _buildTechSpec('Database', 'SQLite via Sqflite ORM'),
