@@ -335,7 +335,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(width: 14),
             Expanded(
               child: Column(
-                cross: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     _activeNetwork.ssid,
@@ -407,7 +407,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: Column(
-              cross: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
                 Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
