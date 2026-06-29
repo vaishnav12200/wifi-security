@@ -1,9 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:cybershield_wifi/models/scan_history.dart';
-import 'package:cybershield_wifi/models/threat_alert.dart';
 import 'package:cybershield_wifi/models/wifi_network.dart';
 import 'package:cybershield_wifi/database/db_helper.dart';
 import 'package:cybershield_wifi/services/pdf_service.dart';
