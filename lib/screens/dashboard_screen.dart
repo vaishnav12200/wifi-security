@@ -429,13 +429,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         border: Border.all(color: const Color(0xFF1E293B), width: 1.5),
       ),
       child: Column(
-        cross: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
-                cross: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Security stability', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                   Text(
@@ -500,7 +500,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          cross: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'Gateway Details',
@@ -534,7 +534,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildAlertsLogSection() {
     return Column(
-      cross: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           'Security Alerts',
