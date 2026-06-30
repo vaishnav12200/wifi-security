@@ -18,10 +18,10 @@ class DashboardScreen extends StatefulWidget {
   final VoidCallback onNavigateToHistory;
 
   const DashboardScreen({
-    Key? key,
+    super.key,
     required this.onNavigateToScanner,
     required this.onNavigateToHistory,
-  }) : super(key: key);
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -30,7 +30,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final NetworkService _networkService = NetworkService();
   final ThreatEngine _threatEngine = ThreatEngine();
-  
+
   bool _isAuditing = false;
   bool _continuousMonitoring = false;
   Timer? _monitoringTimer;
@@ -42,16 +42,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<ThreatAlert> _alerts = [];
   bool _recommendVpn = false;
   String _vpnExplanation = '';
-  
+
   // Diagnostic metrics
   String _localIp = '0.0.0.0';
   String _gatewayIp = '0.0.0.0';
   String _dnsServer = '8.8.8.8';
   int _latency = 22;
   double _internetSpeed = 48.2;
-  
+
   // Real-time chart data points
-  List<FlSpot> _latencyPoints = [];
+  final List<FlSpot> _latencyPoints = [];
   int _chartTimeCounter = 0;
 
   @override
@@ -69,10 +69,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       isOpen: false,
       isConnected: true,
     );
-    
+
     // Seed initial chart data
     for (int i = 0; i < 7; i++) {
-      _latencyPoints.add(FlSpot(i.toDouble(), 15.0 + (i % 3) * 5 + (i == 4 ? 12 : 0)));
+      _latencyPoints.add(FlSpot(
+          i.toDouble(), 15.0 + (i % 3) * 5 + (i == 4 ? 12 : 0)));
       _chartTimeCounter = i;
     }
 
@@ -89,7 +90,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final ip = await _networkService.getLocalIpAddress();
     final gateway = await _networkService.getGatewayIp();
     final dns = await _networkService.getDnsServer();
-    
+
+    if (!mounted) return;
     setState(() {
       _localIp = ip;
       _gatewayIp = gateway;
@@ -107,7 +109,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       setState(() {
         _isAuditing = true;
       });
-      // Visual feedback delay
       await Future.delayed(const Duration(milliseconds: 1500));
     }
 
@@ -116,12 +117,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (!silent) {
       speedResult = await _networkService.runSpeedTest();
     } else {
-      speedResult = 35.0 + (10.0 * (0.5 - (0.5))); // Simulated standard speed
+      speedResult = 35.0;
     }
 
     // Run AI/Heuristic Threat analysis
     final analysis = _threatEngine.analyzeNetwork(_activeNetwork);
 
+    if (!mounted) return;
     setState(() {
       _latency = pingResult['latency'] ?? 0;
       _internetSpeed = speedResult > 0 ? speedResult : _internetSpeed;
@@ -132,18 +134,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _vpnExplanation = analysis['vpnExplanation'];
       _isAuditing = false;
 
-      // Update Chart
       _chartTimeCounter++;
       if (_latencyPoints.length >= 10) {
         _latencyPoints.removeAt(0);
       }
-      _latencyPoints.add(FlSpot(_chartTimeCounter.toDouble(), _latency.toDouble()));
+      _latencyPoints
+          .add(FlSpot(_chartTimeCounter.toDouble(), _latency.toDouble()));
     });
 
     // Save to Database
     final db = DbHelper.instance;
     final scanId = const Uuid().v4();
-    
+
     final history = ScanHistory(
       id: scanId,
       ssid: _activeNetwork.ssid,
@@ -156,7 +158,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       gateway: _gatewayIp,
       dns: _dnsServer,
     );
-    
+
     await db.insertScanHistory(history);
     for (var alert in _alerts) {
       await db.insertThreatAlert(alert);
@@ -183,11 +185,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Text(
                     '${alert.title} DETECTED',
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   Text(
                     alert.description,
-                    style: const TextStyle(fontSize: 12, color: Colors.white70),
+                    style:
+                        const TextStyle(fontSize: 12, color: Colors.white70),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -203,7 +207,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ThreatDetailsScreen(alert: alert, activeNetwork: _activeNetwork),
+                builder: (context) => ThreatDetailsScreen(
+                    alert: alert, activeNetwork: _activeNetwork),
               ),
             );
           },
@@ -212,15 +217,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  /// Toggles continuous monitoring checks every 5 seconds
   void _toggleContinuousMonitoring(bool value) {
     setState(() {
       _continuousMonitoring = value;
     });
 
     if (_continuousMonitoring) {
-      _monitoringTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-        // Run light audits and simulate monitoring changes
+      _monitoringTimer =
+          Timer.periodic(const Duration(seconds: 5), (timer) {
         _runLightMonitoringCheck();
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -243,26 +247,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _runLightMonitoringCheck() {
-    // 1. Simulate minor connection fluctuations (chart updates)
+    if (!mounted) return;
     setState(() {
       _chartTimeCounter++;
       if (_latencyPoints.length >= 10) {
         _latencyPoints.removeAt(0);
       }
-      
-      // Random fluctuation
       final random = DateTime.now().millisecond;
       int baseVal = 18;
-      if (random % 7 == 0) {
-        baseVal = 85; // Simulated latency spike
-      }
+      if (random % 7 == 0) baseVal = 85;
       _latency = baseVal + (random % 10);
-      _latencyPoints.add(FlSpot(_chartTimeCounter.toDouble(), _latency.toDouble()));
+      _latencyPoints
+          .add(FlSpot(_chartTimeCounter.toDouble(), _latency.toDouble()));
     });
+  }
+
+  Color _getRiskColor() {
+    if (_safetyScore >= 90) return AppTheme.cyberGreen;
+    if (_safetyScore >= 75) return AppTheme.cyberCyan;
+    if (_safetyScore >= 50) return AppTheme.cyberAmber;
+    return AppTheme.cyberRed;
   }
 
   @override
   Widget build(BuildContext context) {
+    final riskColor = _getRiskColor();
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -292,11 +301,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+
+          // Quick Actions Row
+          _buildQuickActions(riskColor),
+          const SizedBox(height: 20),
 
           // Diagnostic quick specs grid
           _buildDiagnosticsGrid(),
           const SizedBox(height: 20),
+
+          // VPN Recommendation Banner — shown prominently when risks detected
+          if (_recommendVpn) ...[
+            _buildVpnBanner(),
+            const SizedBox(height: 20),
+          ],
 
           // Interactive monitoring chart
           _buildLiveChartSection(),
@@ -309,9 +328,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Threat Alerts Overview
           if (_alerts.isNotEmpty) _buildAlertsLogSection(),
           if (_alerts.isNotEmpty) const SizedBox(height: 20),
-
-          // VPN Recommendation Card
-          if (_recommendVpn) _buildVpnRecommendationCard(),
         ],
       ),
     );
@@ -327,10 +343,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppTheme.cyberCyan.withOpacity(0.1),
+                color: AppTheme.cyberCyan.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.wifi, color: AppTheme.cyberCyan, size: 24),
+              child:
+                  const Icon(Icons.wifi, color: AppTheme.cyberCyan, size: 24),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -339,24 +356,143 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Text(
                     _activeNetwork.ssid,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'Active connection secured via ${_activeNetwork.securityType}',
-                    style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                    'Active connection via ${_activeNetwork.securityType}',
+                    style: const TextStyle(
+                        fontSize: 11, color: AppTheme.textSecondary),
                   ),
                 ],
               ),
             ),
             _isAuditing
-                ? const SpinKitThreeBounce(color: AppTheme.cyberCyan, size: 18)
+                ? const SpinKitThreeBounce(
+                    color: AppTheme.cyberCyan, size: 18)
                 : TextButton.icon(
                     onPressed: () => _runSecurityAudit(),
                     icon: const Icon(Icons.sync_problem, size: 16),
-                    label: const Text('AUDIT', style: TextStyle(fontSize: 12)),
+                    label:
+                        const Text('AUDIT', style: TextStyle(fontSize: 12)),
                   ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActions(Color riskColor) {
+    return Row(
+      children: [
+        _buildActionChip(
+          icon: Icons.radar,
+          label: 'SCANNER',
+          color: AppTheme.cyberCyan,
+          onTap: widget.onNavigateToScanner,
+        ),
+        const SizedBox(width: 8),
+        _buildActionChip(
+          icon: Icons.history,
+          label: 'HISTORY',
+          color: AppTheme.cyberPurple,
+          onTap: widget.onNavigateToHistory,
+        ),
+        const SizedBox(width: 8),
+        _buildActionChip(
+          icon: Icons.refresh_rounded,
+          label: 'RE-AUDIT',
+          color: riskColor,
+          onTap: _isAuditing ? null : () => _runSecurityAudit(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionChip({
+    required IconData icon,
+    required String label,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: color, size: 20),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVpnBanner() {
+    final isHighRisk = _safetyScore < 50;
+    final bannerColor =
+        isHighRisk ? AppTheme.cyberRed : AppTheme.cyberAmber;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: bannerColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: bannerColor.withValues(alpha: 0.5), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: bannerColor.withValues(alpha: 0.12),
+            blurRadius: 12,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.vpn_lock_rounded, color: bannerColor, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isHighRisk
+                      ? '⚠ VPN MANDATORY — Critical Threats Detected'
+                      : 'VPN Recommended on This Network',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: bannerColor,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  _vpnExplanation,
+                  style: const TextStyle(
+                      fontSize: 10, color: AppTheme.textSecondary),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -368,9 +504,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: _buildMetricTile(
             title: 'Latency',
             value: '$_latency ms',
-            subtitle: _latency == 0 ? 'Timeout' : (_latency < 50 ? 'Excellent' : 'Average'),
+            subtitle: _latency == 0
+                ? 'Timeout'
+                : (_latency < 50 ? 'Excellent' : 'Average'),
             icon: Icons.speed,
-            color: _latency < 50 ? AppTheme.cyberGreen : AppTheme.cyberAmber,
+            color:
+                _latency < 50 ? AppTheme.cyberGreen : AppTheme.cyberAmber,
           ),
         ),
         const SizedBox(width: 12),
@@ -399,7 +538,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       decoration: BoxDecoration(
         color: AppTheme.darkSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E293B), width: 1.5),
+        border:
+            Border.all(color: const Color(0xFF1E293B), width: 1.5),
       ),
       child: Row(
         children: [
@@ -409,9 +549,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
-                Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Text(subtitle, style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold)),
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 11, color: AppTheme.textSecondary)),
+                Text(value,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(subtitle,
+                    style: TextStyle(
+                        fontSize: 10,
+                        color: color,
+                        fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -437,22 +585,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Security stability', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  const Text('Security Stability',
+                      style: TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.bold)),
                   Text(
                     'Continuous monitoring data streams',
-                    style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                    style: TextStyle(
+                        fontSize: 11, color: AppTheme.textSecondary),
                   ),
                 ],
               ),
               Row(
                 children: [
-                  const Text('MONITOR', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                  const Text('MONITOR',
+                      style: TextStyle(
+                          fontSize: 10, fontWeight: FontWeight.bold)),
                   Transform.scale(
                     scale: 0.7,
                     child: Switch(
                       value: _continuousMonitoring,
                       onChanged: _toggleContinuousMonitoring,
-                      activeColor: AppTheme.cyberCyan,
+                      activeTrackColor: AppTheme.cyberCyan,
+                      activeColor: Colors.white,
                     ),
                   ),
                 ],
@@ -464,13 +618,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
             height: 120,
             child: LineChart(
               LineChartData(
-                gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (val) {
-                  return const FlLine(color: Color(0xFF1E293B), strokeWidth: 1);
-                }),
+                gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    getDrawingHorizontalLine: (val) {
+                      return const FlLine(
+                          color: Color(0xFF1E293B), strokeWidth: 1);
+                    }),
                 titlesData: const FlTitlesData(show: false),
                 borderData: FlBorderData(show: false),
-                minX: _latencyPoints.isNotEmpty ? _latencyPoints.first.x : 0,
-                maxX: _latencyPoints.isNotEmpty ? _latencyPoints.last.x : 10,
+                minX: _latencyPoints.isNotEmpty
+                    ? _latencyPoints.first.x
+                    : 0,
+                maxX: _latencyPoints.isNotEmpty
+                    ? _latencyPoints.last.x
+                    : 10,
                 minY: 0,
                 maxY: 120,
                 lineBarsData: [
@@ -483,7 +645,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: AppTheme.cyberCyan.withOpacity(0.1),
+                      color: AppTheme.cyberCyan.withValues(alpha: 0.1),
                     ),
                   ),
                 ],
@@ -509,10 +671,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 12),
             _buildParameterRow('Local IPv4 IP', _localIp),
             _buildParameterRow('Router Gateway IP', _gatewayIp),
-            _buildParameterRow('Primary DNS server', _dnsServer),
+            _buildParameterRow('Primary DNS Server', _dnsServer),
             _buildParameterRow('Hardware Vendor', _activeNetwork.vendor),
-            _buildParameterRow('WiFi Frequency', '${_activeNetwork.frequency} GHz'),
-            _buildParameterRow('Operating Channel', '${_activeNetwork.channel}'),
+            _buildParameterRow(
+                'WiFi Frequency', '${_activeNetwork.frequency} GHz'),
+            _buildParameterRow(
+                'Operating Channel', '${_activeNetwork.channel}'),
           ],
         ),
       ),
@@ -521,12 +685,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildParameterRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-          Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 12, color: AppTheme.textSecondary)),
+          Text(value,
+              style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace')),
         ],
       ),
     );
@@ -536,9 +706,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Security Alerts',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded,
+                color: AppTheme.cyberRed, size: 18),
+            const SizedBox(width: 6),
+            const Text(
+              'Security Alerts',
+              style:
+                  TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            const Spacer(),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppTheme.cyberRed.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '${_alerts.length} FOUND',
+                style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.cyberRed),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         ListView.builder(
@@ -547,29 +741,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
           itemCount: _alerts.length,
           itemBuilder: (context, index) {
             final alert = _alerts[index];
-            final Color alertColor = alert.severity == 'Critical' || alert.severity == 'Danger' 
-                ? AppTheme.cyberRed 
-                : AppTheme.cyberAmber;
-            
+            final Color alertColor =
+                alert.severity == 'Critical' || alert.severity == 'Danger'
+                    ? AppTheme.cyberRed
+                    : AppTheme.cyberAmber;
+
             return Container(
               margin: const EdgeInsets.symmetric(vertical: 4),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: alertColor.withOpacity(0.08),
+                color: alertColor.withValues(alpha: 0.07),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: alertColor.withOpacity(0.3), width: 1),
+                border: Border.all(
+                    color: alertColor.withValues(alpha: 0.3), width: 1),
               ),
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.warning_amber_rounded, color: alertColor),
-                title: Text(alert.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                leading: Icon(Icons.warning_amber_rounded,
+                    color: alertColor),
+                title: Text(alert.title,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 13)),
                 subtitle: Text(
                   alert.description,
-                  style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                      fontSize: 11, color: AppTheme.textSecondary),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppTheme.textSecondary),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded,
+                    size: 14, color: AppTheme.textSecondary),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -586,76 +787,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
         ),
       ],
-    );
-  }
-
-  Widget _buildVpnRecommendationCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.cyberPurple.withOpacity(0.15),
-            AppTheme.cyberCyan.withOpacity(0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.cyberPurple.withOpacity(0.4), width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.security, color: AppTheme.cyberPurple, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                'VPN Protection Recommended',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.cyberPurple,
-                  fontSize: 14,
-                  shadows: [
-                    Shadow(color: AppTheme.cyberPurple.withOpacity(0.5), blurRadius: 4),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _vpnExplanation,
-            style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _buildVpnLogo('Proton VPN'),
-              const SizedBox(width: 8),
-              _buildVpnLogo('Mullvad VPN'),
-              const SizedBox(width: 8),
-              _buildVpnLogo('Cloudflare WARP'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVpnLogo(String name) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppTheme.darkCard,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFF334155), width: 1),
-      ),
-      child: Text(
-        name,
-        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-      ),
     );
   }
 }
