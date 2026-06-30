@@ -28,10 +28,10 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
   List<WifiNetwork> _networks = [];
   Map<String, bool> _trustedMap = {};
 
-  // Attack Simulators State
   bool _simulatedArp = false;
   bool _simulatedDns = false;
   bool _simulatedRogueDhcp = false;
+  bool _sortByScore = false; // false = sort by signal, true = sort by score
 
   late AnimationController _radarController;
 
@@ -112,11 +112,13 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
     final isTrusted = _trustedMap[network.bssid] ?? false;
     if (isTrusted) {
       await _dbHelper.removeTrustedNetwork(network.bssid);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Removed ${network.ssid} from trusted list.'), backgroundColor: AppTheme.darkCard),
       );
     } else {
       await _dbHelper.addTrustedNetwork(network.bssid, network.ssid);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Marked ${network.ssid} as trusted network.'), backgroundColor: AppTheme.cyberGreen),
       );
@@ -138,6 +140,12 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
         title: const Text('NEARBY SIGNALS'),
         actions: [
           IconButton(
+            icon: Icon(_sortByScore ? Icons.security : Icons.signal_cellular_alt,
+                color: AppTheme.cyberCyan),
+            tooltip: _sortByScore ? 'Sort by Signal' : 'Sort by Score',
+            onPressed: () => setState(() => _sortByScore = !_sortByScore),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _isScanning ? null : _startScan,
           ),
@@ -153,30 +161,37 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
           Expanded(
             child: _networks.isEmpty
                 ? const Center(child: Text('No nearby WiFi signals detected.'))
-                : ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: _networks.length,
-                    itemBuilder: (context, index) {
-                      final net = _networks[index];
-                      final isTrusted = _trustedMap[net.bssid] ?? false;
-
-                      // Run diagnostics rules for this network
-                      // Inject simulated parameters
-                      final analysis = _threatEngine.analyzeNetwork(
-                        net,
-                        simulatedArpSpoofing: _simulatedArp && net.ssid.contains('Home'),
-                        simulatedDnsHijack: _simulatedDns && net.ssid.contains('Starbucks'),
-                        simulatedRogueDhcp: _simulatedRogueDhcp && net.ssid.contains('Legacy'),
-                        otherScannedNetworks: _networks,
-                      );
-
-                      int finalScore = isTrusted ? 100 : analysis['score'];
-                      String category = isTrusted ? 'Trusted' : analysis['category'];
-                      List<ThreatAlert> networkAlerts = isTrusted ? [] : List<ThreatAlert>.from(analysis['alerts']);
-                      
-                      return _buildWifiNetworkTile(net, finalScore, category, networkAlerts, isTrusted);
-                    },
-                  ),
+                : Builder(builder: (context) {
+                    final sorted = List<WifiNetwork>.from(_networks);
+                    if (_sortByScore) {
+                      sorted.sort((a, b) {
+                        final sa = _threatEngine.analyzeNetwork(a)['score'] as int;
+                        final sb = _threatEngine.analyzeNetwork(b)['score'] as int;
+                        return sb.compareTo(sa);
+                      });
+                    } else {
+                      sorted.sort((a, b) => b.rssi.compareTo(a.rssi));
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: sorted.length,
+                      itemBuilder: (context, index) {
+                        final net = sorted[index];
+                        final isTrusted = _trustedMap[net.bssid] ?? false;
+                        final analysis = _threatEngine.analyzeNetwork(
+                          net,
+                          simulatedArpSpoofing: _simulatedArp && net.ssid.contains('Home'),
+                          simulatedDnsHijack: _simulatedDns && net.ssid.contains('Starbucks'),
+                          simulatedRogueDhcp: _simulatedRogueDhcp && net.ssid.contains('Legacy'),
+                          otherScannedNetworks: _networks,
+                        );
+                        int finalScore = isTrusted ? 100 : analysis['score'];
+                        String category = isTrusted ? 'Trusted' : analysis['category'];
+                        List<ThreatAlert> networkAlerts = isTrusted ? [] : List<ThreatAlert>.from(analysis['alerts']);
+                        return _buildWifiNetworkTile(net, finalScore, category, networkAlerts, isTrusted);
+                      },
+                    );
+                  }),
           ),
         ],
       ),
@@ -298,7 +313,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
       label: Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
       selected: isActive,
       onSelected: onSelected,
-      selectedColor: AppTheme.cyberPurple.withOpacity(0.2),
+      selectedColor: AppTheme.cyberPurple.withValues(alpha: 0.2),
       checkmarkColor: AppTheme.cyberPurple,
       backgroundColor: AppTheme.darkCard,
       shape: RoundedRectangleBorder(
@@ -319,14 +334,43 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
     bool isTrusted,
   ) {
     final scoreColor = isTrusted ? AppTheme.cyberGreen : _getScoreColor(score);
-    final signalIcon = network.rssi > -60 
-        ? Icons.signal_wifi_4_bar_rounded 
-        : (network.rssi > -80 ? Icons.signal_wifi_bad : Icons.signal_wifi_0_bar);
+
+    // Signal strength bars
+    int signalBars = network.rssi > -55 ? 4 : (network.rssi > -67 ? 3 : (network.rssi > -80 ? 2 : 1));
+    final freqBand = network.frequency >= 5.0 ? '5G' : '2.4G';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: scoreColor.withValues(alpha: 0.35), width: 1.2),
+      ),
       child: ExpansionTile(
-        leading: Icon(signalIcon, color: scoreColor),
+        leading: Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            Icon(
+              network.rssi > -55
+                  ? Icons.signal_wifi_4_bar_rounded
+                  : (network.rssi > -67
+                      ? Icons.network_wifi_3_bar
+                      : (network.rssi > -80 ? Icons.network_wifi_2_bar : Icons.network_wifi_1_bar)),
+              color: scoreColor,
+              size: 28,
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+              decoration: BoxDecoration(
+                color: AppTheme.darkBackground,
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: Text(
+                freqBand,
+                style: TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: scoreColor),
+              ),
+            ),
+          ],
+        ),
         title: Row(
           children: [
             Expanded(
@@ -341,14 +385,28 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
                 margin: const EdgeInsets.only(left: 6),
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppTheme.cyberGreen.withOpacity(0.15),
+                  color: AppTheme.cyberGreen.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: const Text(
-                  'TRUSTED',
+                  '✓ TRUSTED',
                   style: TextStyle(color: AppTheme.cyberGreen, fontSize: 8, fontWeight: FontWeight.bold),
                 ),
               ),
+            // Signal bar dots
+            const SizedBox(width: 8),
+            Row(
+              children: List.generate(4, (i) => Container(
+                width: 4, height: 4 + (i * 2.0),
+                margin: const EdgeInsets.symmetric(horizontal: 1),
+                decoration: BoxDecoration(
+                  color: i < signalBars
+                      ? scoreColor
+                      : AppTheme.textSecondary.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              )),
+            ),
           ],
         ),
         subtitle: Text(
@@ -358,7 +416,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: scoreColor.withOpacity(0.15),
+            color: scoreColor.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -393,9 +451,9 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
                         margin: const EdgeInsets.only(bottom: 6),
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppTheme.cyberRed.withOpacity(0.08),
+                          color: AppTheme.cyberRed.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.cyberRed.withOpacity(0.2)),
+                          border: Border.all(color: AppTheme.cyberRed.withValues(alpha: 0.2)),
                         ),
                         child: Row(
                           children: [
