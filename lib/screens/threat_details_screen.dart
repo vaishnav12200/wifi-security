@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:cybershield_wifi/models/threat_alert.dart';
 import 'package:cybershield_wifi/models/wifi_network.dart';
 import 'package:cybershield_wifi/theme/app_theme.dart';
@@ -52,6 +54,20 @@ class ThreatDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('THREAT PROFILE'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            tooltip: 'Share Threat',
+            onPressed: () {
+              final text =
+                  '⚠ CyberShield Alert: ${alert.title}\n'
+                  'Severity: ${alert.severity}\n'
+                  'Network: ${alert.ssid} (${alert.bssid})\n'
+                  'Details: ${alert.description}';
+              SharePlus.instance.share(ShareParams(text: text));
+            },
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -60,9 +76,9 @@ class ThreatDetailsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: severityColor.withOpacity(0.08),
+              color: severityColor.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: severityColor.withOpacity(0.4), width: 1.5),
+              border: Border.all(color: severityColor.withValues(alpha: 0.4), width: 1.5),
             ),
             child: Column(
               children: [
@@ -85,7 +101,7 @@ class ThreatDetailsScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                   decoration: BoxDecoration(
-                    color: severityColor.withOpacity(0.15),
+                    color: severityColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -141,6 +157,27 @@ class ThreatDetailsScreen extends StatelessWidget {
                   _buildTechnicalRow('Reported BSSID', alert.bssid),
                   _buildTechnicalRow('Attack Vector', alert.type),
                   _buildTechnicalRow('Timestamp', alert.timestamp.toString().substring(0, 19)),
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: alert.bssid));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('BSSID copied to clipboard'),
+                          backgroundColor: AppTheme.darkCard,
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.copy, size: 12, color: AppTheme.cyberCyan),
+                        SizedBox(width: 4),
+                        Text('Long-press any value to copy', style: TextStyle(fontSize: 10, color: AppTheme.cyberCyan)),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -205,7 +242,7 @@ class ThreatDetailsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: critical ? AppTheme.cyberRed.withOpacity(0.1) : AppTheme.cyberCyan.withOpacity(0.1),
+              color: critical ? AppTheme.cyberRed.withValues(alpha: 0.1) : AppTheme.cyberCyan.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Text(
