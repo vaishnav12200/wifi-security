@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cybershield_wifi/theme/app_theme.dart';
+import 'package:cybershield_wifi/screens/splash_screen.dart';
 import 'package:cybershield_wifi/screens/dashboard_screen.dart';
 import 'package:cybershield_wifi/screens/scanner_screen.dart';
 import 'package:cybershield_wifi/screens/history_screen.dart';
@@ -20,7 +21,7 @@ class CyberShieldApp extends StatelessWidget {
       title: 'CyberShield WiFi',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const MainNavigationShell(),
+      home: const SplashScreen(),
     );
   }
 }
@@ -42,7 +43,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.shield_outlined, color: AppTheme.cyberCyan, size: 22),
+            const Icon(Icons.shield_rounded, color: AppTheme.cyberCyan, size: 22),
             const SizedBox(width: 8),
             Text(
               'CYBERSHIELD WiFi',
@@ -53,7 +54,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
                 shadows: [
                   Shadow(
                     blurRadius: 10,
-                    color: AppTheme.cyberCyan.withOpacity(0.3),
+                    color: AppTheme.cyberCyan.withValues(alpha: 0.3),
                   ),
                 ],
               ),
@@ -85,7 +86,8 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         backgroundColor: AppTheme.darkSurface,
         selectedItemColor: AppTheme.cyberCyan,
         unselectedItemColor: AppTheme.textSecondary,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
+        selectedLabelStyle:
+            const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
         unselectedLabelStyle: const TextStyle(fontSize: 10),
         items: const [
           BottomNavigationBarItem(
